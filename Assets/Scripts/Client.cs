@@ -8,6 +8,9 @@ using UnityEngine;
 public class Client : MonoSingleton<Client>
 {
     public Telepathy.Client client = new Telepathy.Client(1920 * 1080 + 1024);
+
+    private Ctrl_Main ctrl => _ctrl ??= FindAnyObjectByType<Ctrl_Main>();
+    private Ctrl_Main _ctrl;
     private void Awake()
     {
         // update even if window isn't focused, otherwise we don't receive.
@@ -130,10 +133,11 @@ public class Client : MonoSingleton<Client>
 
         Debug.Log($"Receive Get Undisplayed Count::{count}");
 
-        GameObject.Find("Ctrl").GetComponent<Ctrl_Main>().AddJunk(count);
+        ctrl.AddJunk(count);
     }
     private void ReceiveGetEditorData(ref byte[] message)
     {
+        // Receive Data
         byte[] headerLengthBytes = new byte[4];
         Buffer.BlockCopy(message, 4, headerLengthBytes, 0, 4);
         int headerLength = BitConverter.ToInt32(headerLengthBytes);
@@ -142,6 +146,7 @@ public class Client : MonoSingleton<Client>
         Buffer.BlockCopy(message, 8, headerBytes, 0, headerLength);
         string headerStr = Encoding.UTF8.GetString(headerBytes);
 
+        // Data Parsing
         EditorDataRaw.Header header = JsonUtility.FromJson<EditorDataRaw.Header>(headerStr);
 
         byte[] textureBytes = new byte[header.TextureLength];
@@ -160,7 +165,8 @@ public class Client : MonoSingleton<Client>
 
         Debug.Log($"Receive Get Editor Data::{raw.ToString()}");
 
-        GameObject.Find("Ctrl").GetComponent<Ctrl_Main>().Add(raw);
+        // Display UI
+        ctrl.Add(raw);
     }
     private void ReceiveUpdateDisplayState(ref byte[] message)
     {
