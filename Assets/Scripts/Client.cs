@@ -83,6 +83,9 @@ public class Client : MonoSingleton<Client>
             case ConstantValues.CMD_RESPONSE_UPDATE_DISPLAY_STATE:
                 ReceiveUpdateDisplayState(message: ref messageBytes);
                 break;
+            case ConstantValues.CMD_RECEIVE_REQUEST_GET_UNDISPLAYED_ID_LIST:
+                RequestGetUndisplayedIdList();
+                break;
             default:
                 break;
         }
