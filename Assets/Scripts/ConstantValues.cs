@@ -11,7 +11,6 @@ public static class ConstantValues
     public const int CMD_REQUEST_UPDATE_DISPLAY_STATE = 3004;
     public const int CMD_RESPONSE_UPDATE_DISPLAY_STATE = 3005;
 
-    public const int CMD_REQUEST_CONNECT_GALLERY = 3100;
-
-    public const int CMD_RESPONSE_CONNECT_RESULT = 9100;
+    public const int CMD_REQUEST_CONNECT_GALLERY = 3900;
+    public const int CMD_RESPONSE_CONNECT_RESULT = 9900;
 }
