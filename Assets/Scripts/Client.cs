@@ -74,8 +74,8 @@ public class Client : MonoSingleton<Client>
 
         switch (command)
         {
-            case ConstantValues.CMD_RESPONSE_GET_UNDISPLAYED_COUNT:
-                ReceiveGetUndisplayedCount(message: ref messageBytes);
+            case ConstantValues.CMD_RESPONSE_GET_UNDISPLAYED_ID_LIST:
+                ReceiveGetUndisplayedIdList(message: ref messageBytes);
                 break;
             case ConstantValues.CMD_RESPONSE_GET_EDITOR_DATA:
                 ReceiveGetEditorData(message: ref messageBytes);
@@ -88,29 +88,30 @@ public class Client : MonoSingleton<Client>
         }
     }
 
-    public void RequestGetUndisplayedCount()
+    public void RequestGetUndisplayedIdList()
     {
         using (MemoryStream ms = new MemoryStream())
         using (BinaryWriter bw = new BinaryWriter(ms))
         {
-            bw.Write(ConstantValues.CMD_REQUEST_GET_UNDISPLAYED_COUNT);
+            bw.Write(ConstantValues.CMD_REQUEST_GET_UNDISPLAYED_ID_LIST);
 
             client.Send(ms.ToArray());
         }
 
-        Debug.Log($"Request Get Undisplayed Count");
+        Debug.Log($"Request Get Undisplayed Id List");
     }
-    public void RequestGetEditorData()
+    public void RequestGetEditorDataById(int id)
     {
         using (MemoryStream ms = new MemoryStream())
         using (BinaryWriter bw = new BinaryWriter(ms))
         {
             bw.Write(ConstantValues.CMD_REQUEST_GET_EDITOR_DATA);
+            bw.Write(id);
 
             client.Send(ms.ToArray());
         }
 
-        Debug.Log($"Request Get Editor Data");
+        Debug.Log($"Request Get Editor Data By Id::{id}");
     }
     public void RequestUpdateDisplayStateById(int id)
     {
@@ -125,15 +126,29 @@ public class Client : MonoSingleton<Client>
 
         Debug.Log($"Request Update Display State By Id::{id}");
     }
-    private void ReceiveGetUndisplayedCount(ref byte[] message)
+    private void ReceiveGetUndisplayedIdList(ref byte[] message)
     {
         byte[] countBytes = new byte[4];
         Buffer.BlockCopy(message, 4, countBytes, 0, 4);
         int count = BitConverter.ToInt32(countBytes);
 
-        Debug.Log($"Receive Get Undisplayed Count::{count}");
+        if (count > 0)
+        {
+            List<int> ids = new List<int>();
 
-        ctrl.AddJunk(count);
+            for (int i = 0; i < count; i++)
+            {
+                byte[] idBytes = new byte[4];
+                Buffer.BlockCopy(message, 8 + i * 4, idBytes, 0, 4);
+                int id = BitConverter.ToInt32(idBytes);
+
+                ids.Add(id);
+            }
+
+            ctrl.CallRequestData(ids);
+        }
+
+        Debug.Log($"Receive Get Undisplayed Id List::{count}");
     }
     private void ReceiveGetEditorData(ref byte[] message)
     {

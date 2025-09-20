@@ -1,40 +1,38 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Ctrl_Main : MonoBehaviour
 {
     [SerializeField] private Slot[] slots;
 
-    private Queue<EditorDataRaw> samples = new Queue<EditorDataRaw>();
+    private Queue<EditorDataRaw> dataQueue = new Queue<EditorDataRaw>();
     private int slotIndex = 0;
     private void Start()
     {
         Debug.Log("Client is Available? " + (Client.Instance != null));
+        RequestUndisplayedIdList();
     }
 
+    float timer = 0f;
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A))
+        timer += Time.deltaTime;
+
+        if (timer > 3f)
         {
-            RequestCount();
-        }
-        else if (Input.GetKeyDown(KeyCode.S))
-        {
-            RequestData();
-        }
-        else if (Input.GetKeyDown(KeyCode.D))
-        {
-            Display();
+            if (dataQueue.Count > 0)
+            {
+                Display();
+            }
+
+            timer = 0f;
         }
     }
-    public void RequestCount()
+    public void RequestUndisplayedIdList()
     {
-        Client.Instance.RequestGetUndisplayedCount();
-    }
-    private void RequestData()
-    {
-        Client.Instance.RequestGetEditorData();
+        Client.Instance.RequestGetUndisplayedIdList();
     }
     private void Display()
     {
@@ -44,7 +42,7 @@ public class Ctrl_Main : MonoBehaviour
         }
         Slot slot = slots[slotIndex++];
 
-        EditorDataRaw editorDataRaw = samples.Dequeue();
+        EditorDataRaw editorDataRaw = dataQueue.Dequeue();
         if (slot.state == SlotState.available)
         {
             slot.Activate(editorDataRaw);
@@ -59,17 +57,17 @@ public class Ctrl_Main : MonoBehaviour
 
     public void Add(EditorDataRaw editorDataRaw)
     {
-        samples.Enqueue(editorDataRaw);
+        dataQueue.Enqueue(editorDataRaw);
     }
-    public void AddJunk(int count)
+    public void CallRequestData(IEnumerable<int> ids)
     {
         StartCoroutine(Cor());
 
         IEnumerator Cor()
         {
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < ids.Count(); i++)
             {
-                RequestData();
+                Client.Instance.RequestGetEditorDataById(ids.ElementAt(i));
 
                 yield return new WaitForSeconds(1f);
             }
