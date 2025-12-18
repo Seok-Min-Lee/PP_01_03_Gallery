@@ -4,6 +4,9 @@
 **[체험 플로우]**
 ![체험 플로우](behindthescene_zone_drawing.png)
 </br></br>
+**[시스템 구성]**
+![시스템 구성](behindthescene_system_drawing.png)
+</br></br>
 **[최종 결과물]**
 ![최종 결과물](behindthescene_result_example.png)
 </br></br>
